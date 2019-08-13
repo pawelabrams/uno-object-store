@@ -19,7 +19,7 @@ $requestBody = file_get_contents('php://input');
 
 $app = include '../app.php';
 
-$result = $app($_SERVER['REQUEST_METHOD'], $path, $requestBody);
+$result = $app($_SERVER['REQUEST_METHOD'], $path, $_GET, $requestBody);
 
 if (empty($result))
     header('HTTP/1.1 204 No content');

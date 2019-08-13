@@ -1,6 +1,6 @@
 <?php
 
-return function ($path) use ($db) {
+return function ($path, $bare = true) use ($db) {
     $results = [];
     $stmt = $db->prepare("SELECT * FROM store WHERE path = ?");
     $stmt->execute([$path]);
@@ -9,5 +9,7 @@ return function ($path) use ($db) {
 
     if (!$obj) throw new Exception('Object not found', 404);
 
-    return unpackContents($obj);
+    $obj = unpackContents($obj);
+
+    return $bare ? $obj['contents'] : $obj;
 };

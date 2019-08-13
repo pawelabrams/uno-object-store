@@ -8,7 +8,10 @@ return function ($path, $full = false) use ($db) {
     $stmt->execute(["$path%"]);
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $results[] = $full ? unpackContents($row) : $row['path'];
+        if ($full)
+            $results[$row['path']] = unpackContents($row)['contents'];
+        else
+            $results[] = $row['path'];
     }
 
     return $results;

@@ -13,4 +13,9 @@ To run, point your webserver of choice to serve all endpoints through public/ind
 
 You will need a database store, so go to `data` folder and run `sqlite3 store.db ".read schema.sql"`. That will create a store for you.
 
-Requirements? PHP, SQLite PDO driver.
+**Requirements?** PHP, SQLite PDO driver.
+
+**Special parameters:**
+- Use GET ?pathsOnly on listing paths to get keys only.
+- Use GET ?full on item paths to get full entity with `path`. Entity's contents will be in `contents` field.
+- Use PUT/PATCH/DELETE ?withStatus to get JSON messages with affected row count. Without this, the status is indicated in HTTP status code -- 20x for OK, 4xx for errors.

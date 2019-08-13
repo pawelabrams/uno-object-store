@@ -1,6 +1,6 @@
 <?php
 
-return function ($path, $contents) use ($db) {
+return function ($path, $contents, $withStatus = false) use ($db) {
     $stmt = $db->prepare("SELECT * FROM store WHERE path = ? LIMIT 1");
     $stmt->execute([$path]);
 
@@ -16,7 +16,7 @@ return function ($path, $contents) use ($db) {
     $update = $db->prepare("UPDATE store SET contents = ? WHERE path = ? AND contents = ?");
     $update->execute([json_encode($contents), $path, $oldContents]);
 
-    if (($rowCount = $update->rowCount()) > 0) return ['rowCount' => $rowCount];
+    if (($rowCount = $update->rowCount()) > 0) return $withStatus ? ['rowCount' => $rowCount] : null;
 
     throw new Exception('Patch was interrupted', 409);
 };

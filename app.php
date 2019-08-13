@@ -3,7 +3,7 @@
  * Uno object store main file and router.
  */
 
-return function ($method, $path, $requestBody) use ($db, $config) {
+return function ($method, $path, $params, $requestBody) use ($db, $config) {
 
 /** Helpers */
 
@@ -20,26 +20,26 @@ $put    = include 'methods/put.php';
 /** Router */
 
 if (in_array($path, $config->listingPaths)) {
-    return $list($path, isset($_GET['full']));
+    return $list($path, !isset($params['pathsOnly']));
 }
 
 try {
     switch ($method) {
         case 'GET':
-            $result = $get($path);
+            $result = $get($path, !isset($params['full']));
             break;
 
         case 'POST':
         case 'PUT':
-            $result = $put($path, $requestBody);
+            $result = $put($path, $requestBody, isset($params['withStatus']));
             break;
 
         case 'PATCH':
-            $result = $patch($path, $requestBody);
+            $result = $patch($path, $requestBody, isset($params['withStatus']));
             break;
 
         case 'DELETE':
-            $result = $delete($path);
+            $result = $delete($path, isset($params['withStatus']));
             break;
 
         default:
