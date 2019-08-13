@@ -9,8 +9,9 @@ function assoc_map(callable $f, array $a) {
 
 function error_map($code) {
     switch ($code) {
-        case '405': return '405 Method not allowed';
-        case '409': return '409 Conflict';
+        case 404: return '404 Not found';
+        case 405: return '405 Method not allowed';
+        case 409: return '409 Conflict';
         default: return '400 Bad Request';
     }
 }

@@ -1,67 +1,33 @@
 <?php
 /*
- * Uno object store main file and router.
+ * Uno object store entry point.
  */
 
 /** Config */
 
-$listingPaths = [''];
+$config = (object)[
+    /** Which paths should be listings, no trailing slashes, eg. category if there are paths like category/1, category/abc etc. */
+    'listingPaths' => [''],
+];
 
-$path = trim($_SERVER['PATH_INFO'] ?? '', '/');
-$data = file_get_contents('php://input');
-
+/** Database path here. Use data/schema.sql to create a store. */
 $db = new \PDO('sqlite:'.dirname(__DIR__).'/data/store.db');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-/** Helpers */
+$path = trim($_SERVER['PATH_INFO'] ?? '', '/');
+$requestBody = file_get_contents('php://input');
 
-include 'helpers.php';
+$app = include '../app.php';
 
-/** Controllers */
+$result = $app($_SERVER['REQUEST_METHOD'], $path, $requestBody);
 
-$delete = include 'methods/delete.php';
-$get    = include 'methods/get.php';
-$list   = include 'methods/list.php';
-$patch  = include 'methods/patch.php';
-$put    = include 'methods/put.php';
+if (empty($result))
+    header('HTTP/1.1 204 No content');
 
-/** Router */
-
-if (in_array($path, $listingPaths)) {
-    echo json_encode($list($path, isset($_GET['full'])));
-    return;
+// TODO: ugly hack. It stays until a decision is made on an envelope or namedtuple implementation
+if (isset($result['_withHeaders'])) {
+    foreach ($result['_withHeaders'] as $header) header($header);
+    unset($result['_withHeaders']);
 }
 
-try {
-    switch ($_SERVER['REQUEST_METHOD']) {
-        case 'GET':
-            $result = $get($path);
-            break;
-
-        case 'POST':
-        case 'PUT':
-            $result = $put($path, $data);
-            break;
-
-        case 'PATCH':
-            $result = $patch($path, $data);
-            break;
-
-        case 'DELETE':
-            $result = $delete($path);
-            break;
-
-        default:
-            new Exception('Method not allowed', 405);
-    }
-
-    if (empty($result))
-        header('HTTP/1.1 204 No content');
-
-    echo json_encode($result);
-
-} catch (Exception $e) {
-    header('HTTP/1.1 '.error_map($e->getCode ?? null));
-
-    echo json_encode(['error' => ['code' => $e->getCode(), 'message' => $e->getMessage()]]);
-}
+echo json_encode($result);
